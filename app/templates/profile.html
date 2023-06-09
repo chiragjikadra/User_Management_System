@@ -1,0 +1,8 @@
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save</button>
+</form>
+
+<img src="{{ profile.profile_photo.url }}" alt="Profile Photo">
+<p>Designation: {{ profile.designation }}</p>
