@@ -1,32 +1,32 @@
+from .models import User
 from rest_framework import serializers
-from app.models import User
+from .models import Profile
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
-
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'password2']
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        fields = ['id', 'username', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
 
-    # Validating Password and Confirm Password while Registration
-    def validate(self, attrs):
-        password = attrs.get('password')
-        password2 = attrs.get('password2')
-        if password != password2:
-            raise serializers.ValidationError("Password and Confirm Password doesn't match")
-        return attrs
-
-    def create(self, validate_data):
-        return User.objects.create_user(**validate_data)
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User.objects.create_user(**validated_data)
+        if password is not None:
+            user.set_password(password)
+        user.save()
+        return user
 
 
-class UserLoginSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=255)
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
 
     class Meta:
-        model = User
-        fields = ['email', 'password']
+        model = Profile
+        fields = ['user', 'photo', 'designation']
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = UserSerializer().create(user_data)
+        profile = Profile.objects.create(user=user, **validated_data)
+        return profile
