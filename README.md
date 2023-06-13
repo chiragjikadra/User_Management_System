@@ -1,62 +1,100 @@
-Django API
+```
+## Django API
 
 This project implements a Django REST Framework (DRF) API for user signup, login, and profile management.
 It includes views for signing up a user, logging in with authentication, and managing user profiles.
 
-Installation:
+## Installation:
 
-1.Create a virtual environment and activate it:
+1. Clone the repository:
+```
 
-2.Install the dependencies:
- - pip install -r requirements.txt
+git clone https://github.com/chiragjikadra/User_Management_System
 
-3.Apply database migrations:
--python manage.py migrate
+```markdown
+2. Create a virtual environment and activate it:
+```
 
-Usage
+python3 -m venv venv
+
+source venv/Script/activate
+
+```markdown
+3. Install the dependencies:
+```
+
+pip install -r requirements.txt
+
+```markdown
+4. Apply database migrations:
+```
+
+python manage.py migrate
+
+```markdown
+## Usage
 
 To start the Django development server, run the following command:
--python manage.py runserver
+```
 
-By default, the server will start at http://localhost:8000/.
+python manage.py runserver
 
-Signup
-To sign up a new user, make a POST request to /signup/ with the following JSON payload:
+```csharp
 
+By default, the server will start at `http://localhost:8000/`.
+
+## Signup
+
+To sign up a new user, make a POST request to `/signup/` with the following JSON payload:
+
+```json
 {
-    "user":
-    {
-        "username":"example",
-        "email": "example@abc.com",
-        "password": "example"
+    "user":{
+        "username":"chirag",
+        "email": "chirag@abc.com",
+        "password": "1205"
+
     },
     "designation":"developer"
 }
+```
 
 This will create a new user and associated profile.
 
-Login
-To authenticate a user and obtain an authentication token, make a POST request to /login/ with the following JSON payload:
+### Login
+
+To authenticate a user and obtain an authentication token, make a POST request to /login/ with the following JSON
+payload:
+
+```json
 {
   "email": "user@example.com",
   "password": "password123"
 }
-If the credentials are valid, the response will include a token that can be used for subsequent authenticated requests.
+```
 
-Profile
-The profile management endpoints require authentication. Include the obtained token in the Authorization header of the request:
+### Profile
+
+The profile management endpoints require authentication. Include the obtained token in the Authorization header of the
+request:
+
+```makefile
 Authorization: Token <token>
+```
+
 Get Profile
 To retrieve the profile for the currently authenticated user, make a GET request to /profile/.
 
 The response will include the user's profile details.
 
 Update Profile
-To update the user's profile picture, make a POST request to /profile/ with a multipart/form-data payload containing an image file with the field name image_test.
+To update the user's profile picture, make a POST request to /profile/ with a multipart/form-data payload containing an
+image file with the field name image_test.
 
-Tests
+### Tests
+
 To run the tests, use the following command:
 
-bash
+```bash
 python manage.py test
-This will execute the test cases and display the results.
+```
