@@ -1,29 +1,82 @@
 from django.contrib.auth import authenticate
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import User, Profile
-from .serializers import UserRegistrationSerializer, UserLoginSerializer
+
+from .models import Profile
+from .serializers import ProfileSerializer
 
 
-# Create your views here.
-class UserRegistrationViews(APIView):
+class SignupView(APIView):
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                       properties={
+                                           "username": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                      max_length=255),
+                                           "email": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                   max_length=255)}),
+                "password": openapi.Schema(type=openapi.TYPE_STRING, max_length=255),
+                'designation': openapi.Schema(type=openapi.TYPE_STRING, max_length=255)
+            }
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'user': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                           properties={"id": openapi.Schema(type=openapi.TYPE_INTEGER, max_length=255),
+                                                       "username": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                                  max_length=255),
+                                                       "email": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                               max_length=255)}),
+                    'photo': openapi.Schema(type=openapi.TYPE_FILE, max_length=255),
+                    'designation': openapi.Schema(type=openapi.TYPE_STRING, max_length=255)
+                }
+            ),
+            500: "Internal Server error"
+        }
+
+    )
     def post(self, request):
-        serialiser = UserRegistrationSerializer(data=request.data)
-        if serialiser.is_valid(raise_exception=True):
-            user = serialiser.save()
-            return Response({'message': 'Registration successfully'}, status=status.HTTP_201_CREATED)
-        return Response(serialiser.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserLoginViews(APIView):
-    def post(self, request):
-        serializer = UserLoginSerializer(data=request.data)
+        serializer = ProfileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.data.get('email')
-        password = serializer.data.get('password')
+        serializer.save()
+        return Response(serializer.data)
+
+
+class LoginView(APIView):
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "username": openapi.Schema(type=openapi.TYPE_STRING, max_length=255),
+                'password': openapi.Schema(type=openapi.TYPE_STRING, max_length=255)
+            }
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'message': openapi.Schema(type=openapi.TYPE_STRING, max_length=255),
+                    'token': openapi.Schema(type=openapi.TYPE_STRING, max_length=255)
+                }
+            ),
+            500: "Internal Server error"
+        }
+
+    )
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
 
         user = authenticate(email=email, password=password)
         if user is not None:
@@ -33,25 +86,80 @@ class UserLoginViews(APIView):
             return Response({'error': 'email or password is not valid'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class ProfilePhotoUploadView(APIView):
+class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
 
-    def put(self, request):
-        user = request.user
-        print(user)
-        profile = Profile.objects.get(user=user)
+    @swagger_auto_schema(
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'user': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                           properties={"id": openapi.Schema(type=openapi.TYPE_INTEGER, max_length=255),
+                                                       "username": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                                  max_length=255),
+                                                       "email": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                               max_length=255)}),
+                    'photo': openapi.Schema(type=openapi.TYPE_FILE, max_length=255),
+                    'designation': openapi.Schema(type=openapi.TYPE_STRING, max_length=255)
+                }
+            ),
+            500: "Internal Server error"
+        }
 
-        photo = request.data.get('photo')
-        profile.profile_photo = photo
-        profile.save()
+    )
+    def get(self, request):
+        try:
+            profile = Profile.objects.get(user=request.user)
+            print(profile)
+            data = self.serializer_class(profile)
+            return Response(data.data)
 
-        return Response({'message': 'Profile photo uploaded successfully'})
-        # if request.method == 'POST':
-        #     form = ProfileForm(request.POST, request.FILES, instance=profile)
-        #     if form.is_valid():
-        #         form.save()
-        #         return redirect('profile')
-        # else:
-        #     form = ProfileForm(instance=profile)
-        #
-        # return render(request, 'profile.html', {'form': form, 'profile': profile})
+        except Exception as e:
+            return Response(e, status=404)
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                       properties={
+                                           "username": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                      max_length=255),
+                                           "email": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                   max_length=255)}),
+                "password": openapi.Schema(type=openapi.TYPE_STRING, max_length=255),
+                'designation': openapi.Schema(type=openapi.TYPE_STRING, max_length=255)
+            }
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'user': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                           properties={"id": openapi.Schema(type=openapi.TYPE_INTEGER, max_length=255),
+                                                       "username": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                                  max_length=255),
+                                                       "email": openapi.Schema(type=openapi.TYPE_STRING,
+                                                                               max_length=255)}),
+                    'photo': openapi.Schema(type=openapi.TYPE_FILE, max_length=255),
+                    'designation': openapi.Schema(type=openapi.TYPE_STRING, max_length=255)
+                }
+            ),
+            500: "Internal Server error"
+        }
+
+    )
+    def post(self, request):
+        try:
+            image = request.FILES['image_test']
+            profile = Profile.objects.get(user=request.user)
+            profile.photo = image
+            profile.save()
+            print(profile)
+            data = self.serializer_class(profile)
+            return Response(data.data)
+
+        except Exception as e:
+            return Response(e, status=404)
