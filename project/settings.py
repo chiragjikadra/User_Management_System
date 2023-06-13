@@ -7,12 +7,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zzqkvia6^aw=kl_6)#usivo(j#n@9vgas7n*)d_ules@_m&^-_'
+SECRET_KEY = 'django-insecure-ik-igl98w+icz(tv(2&24n2v($0p(lmeoye)k_&vbf*^2sxe$#'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -26,11 +26,14 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'app',
+    'corsheaders',
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware'
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -64,7 +67,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'test',
+        'NAME': 'test1',
         'USER': 'root',
         'PASSWORD': 'root',
         'HOST': 'localhost',
@@ -110,10 +113,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'app.User'
-
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    ],
+
+    ),
 }
+
+AUTH_USER_MODEL = 'app.User'
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
